@@ -1,5 +1,7 @@
-import { createRoot } from "react-dom/client";
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+// In SSR mode, createRoot has to be imported in ClientApp
+// import { createRoot } from "react-dom/client";
+// In SSR mode, BrowserRouter has to be imported in ClientApp
+import {Routes, Route, Link } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState,lazy, Suspense } from "react";
 import AdoptedPetContext from "./AdoptedPetContext";
@@ -20,7 +22,7 @@ const App = () => {
   const adoptedPet = useState(null);
   return (
     <div>
-      <BrowserRouter>
+      {/* <BrowserRouter> */}
         <AdoptedPetContext.Provider value={adoptedPet}>
           <QueryClientProvider client={queryClient}>
             <Suspense fallback={<div className="loading-pane"><h2 className="loader">😀</h2></div>}>
@@ -34,11 +36,14 @@ const App = () => {
             </Suspense>
           </QueryClientProvider>
         </AdoptedPetContext.Provider>
-      </BrowserRouter>
+      {/* </BrowserRouter> */}
     </div>
   );
 };
 
-const container = document.getElementById("root");
-const root = createRoot(container);
-root.render(<App />);
+//This is not needed in SSR mode, we are making App runneable in client and server
+// const container = document.getElementById("root");
+// const root = createRoot(container);
+// root.render(<App />);
+
+export default App;
