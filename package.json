@@ -12,7 +12,7 @@
     "format": "prettier --write \"src/**/*.{js,jsx}\"",
     "lint": "eslint \"src/**/*.{js,jsx}\" --quiet",
     "preview": "vite preview",
-    "start": "node server.js"
+    "start": "node --experimental-fetch server.js"
   },
   "keywords": [],
   "author": "Brian Holt",
