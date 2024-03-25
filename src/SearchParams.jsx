@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext,useDeferredValue, useMemo, useState, useTransition } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Results from "./Results";
 import AdoptedPetContext from "./AdoptedPetContext";
@@ -15,9 +15,24 @@ const SearchParams = () => {
   const [adoptedPet] = useContext(AdoptedPetContext);
   const [animal, setAnimal] = useState("");
   const [breeds] = useBreedList(animal);
+  const [isPending, startTransition] = useTransition()
 
   const results = useQuery(["search", requestParams], fetchSearch);
   const pets = results?.data?.pets ?? [];
+
+  /** 
+   * useDeferredValue example
+   * 
+   * The useDeferredValue hook is used to defer the value of pets to the next render.
+   * In should be used to low priorty updates, like search results, that can be deferred to the next render.
+   * In this case has no effect on the user experience, but it can be used to improve performance.
+   * This is only an usage example.
+   * **/
+
+  const deferredPets = useDeferredValue(pets)
+  const renderedPets = useMemo(() => <Results pets={deferredPets}/>, [deferredPets])
+
+  /** End of useDeferredValue example**/
 
   return (
     <div className="search-params">
@@ -30,7 +45,11 @@ const SearchParams = () => {
             breed: formData.get("breed") ?? "",
             location: formData.get("location") ?? "",
           };
-          setRequestParams(obj);
+          // Step 1 of the transition
+          startTransition(() => {
+            // Whatever happens inside of starTransition, low priority stuff can be interrupted
+            setRequestParams(obj);
+          })
         }}
       >
         {adoptedPet ? (
@@ -75,10 +94,19 @@ const SearchParams = () => {
             ))}
           </select>
         </label>
-
-        <button>Submit</button>
+        {/**  Step 2 of the transition */}
+        {
+          isPending ? (
+            <div className="mini loading-pane">
+              <h2 className="loader">😺</h2>
+            </div>
+          ) : <button>Submit</button>
+        } 
+        
       </form>
-      <Results pets={pets} />
+      {/** This is only for the useDeferred value example, Results component should not be deferred **/}
+      {renderedPets}
+      {/* <Results pets={pets} /> */}
     </div>
   );
 };
